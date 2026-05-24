@@ -71,6 +71,8 @@ private:
   const char* willMessage;
   const char* mqttuser;
   const char* mqttpw;
+  const char* mqttServer;
+  uint16 mqttPort;
 
 private:
   std::map<String, String> metadata;

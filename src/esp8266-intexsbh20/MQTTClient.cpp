@@ -76,6 +76,8 @@ void MQTTClient::setup(const char* mqttServer, uint16 mqttPort, const char* mqtt
   clientId = cid;
   willTopic = wt;
   willMessage = wm;
+  this->mqttServer = mqttServer;
+  this->mqttPort = mqttPort;
 
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(std::bind(&MQTTClient::subscriptionUpdate, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -86,7 +88,7 @@ void MQTTClient::reconnect()
   if (!mqttClient.connected() && timeDiff(now, lastConnectTime) > RECONNECT_DELAY)
   {
     // not connected, try to reconnect
-    Serial.print("trying to connect to MQTT server ... ");
+    Serial.printf("trying to connect to MQTT server %s:%d ... ", mqttServer, mqttPort);
     if (mqttClient.connect(clientId, mqttuser, mqttpw, willTopic, MQTTQOS0, true, willMessage))
     {
       // connected
