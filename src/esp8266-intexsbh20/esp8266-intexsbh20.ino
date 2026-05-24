@@ -56,6 +56,7 @@
 #include "OTAUpdate.h"
 #include "PureSpaIO.h"
 
+#include <ArduinoOTA.h>
 #include <stdexcept>
 
 ConfigurationFile config;
@@ -144,6 +145,13 @@ void setup()
       }
       mqttClient.setup(config.get(CONFIG_TAG::MQTT_SERVER), mqttPort, username.c_str(), password.c_str(), pureSpaIO.getModelName(), MQTT_TOPIC::STATE, "offline");
 
+      // init ArduinoOTA (espota)
+      ArduinoOTA.setHostname(pureSpaIO.getModelName());
+      if (config.exists(CONFIG_TAG::WIFI_OTA_PASSWORD))
+      {
+        ArduinoOTA.setPassword(config.get(CONFIG_TAG::WIFI_OTA_PASSWORD));
+      }
+
       // init NTC thermometer
       thermometer.setup(22000, 3.33f, 320.f/100.f); // measured: 21990, 3.327f, 319.f/99.6f
 
@@ -187,6 +195,7 @@ void loop()
 
       // init whirlpool I/O after first WiFi connect
       pureSpaIO.setup(language);
+      ArduinoOTA.begin();
       initialized = true;
     }
     else
@@ -194,6 +203,9 @@ void loop()
       // update MQTT
       mqttClient.loop();
       mqttPublisher.loop();
+
+      // handle ArduinoOTA requests
+      ArduinoOTA.handle();
 
       // update pool
       pureSpaIO.loop();
