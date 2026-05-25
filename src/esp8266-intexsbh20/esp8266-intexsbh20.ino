@@ -50,6 +50,7 @@
 
 #include "common.h"
 #include "ConfigurationFile.h"
+#include "HADiscovery.h"
 #include "MQTTClient.h"
 #include "MQTTPublisher.h"
 #include "NTCThermometer.h"
@@ -73,6 +74,7 @@ String mqttPort;
 unsigned long disconnectTime = 0;
 LANG language = LANG::CODE;
 bool initialized = false;
+bool discoveryPublished = false;
 
 
 /**
@@ -196,6 +198,7 @@ void loop()
       // init whirlpool I/O after first WiFi connect
       pureSpaIO.setup(language);
       ArduinoOTA.begin();
+
       initialized = true;
     }
     else
@@ -203,6 +206,13 @@ void loop()
       // update MQTT
       mqttClient.loop();
       mqttPublisher.loop();
+
+      // publish Home Assistant MQTT autodiscovery once connected
+      if (!discoveryPublished && mqttClient.isConnected())
+      {
+        HADiscovery::publish(mqttClient.getClient());
+        discoveryPublished = true;
+      }
 
       // handle ArduinoOTA requests
       ArduinoOTA.handle();

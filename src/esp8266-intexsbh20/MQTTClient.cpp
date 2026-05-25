@@ -79,6 +79,7 @@ void MQTTClient::setup(const char* mqttServer, uint16 mqttPort, const char* mqtt
   this->mqttServer = mqttServer;
   this->mqttPort = mqttPort;
 
+  mqttClient.setBufferSize(1536);
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(std::bind(&MQTTClient::subscriptionUpdate, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
